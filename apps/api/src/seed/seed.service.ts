@@ -37,7 +37,7 @@ export class SeedService implements OnApplicationBootstrap {
         email: 'demo@cinenova.dev',
         name: 'Demo CineNova',
         passwordHash: await bcrypt.hash('demo1234', 10),
-        points: 150,
+        points: 0,
       } as any),
     )) as unknown as User;
     const maria = (await this.usersRepo.save(
@@ -46,7 +46,7 @@ export class SeedService implements OnApplicationBootstrap {
         email: 'maria@cinenova.dev',
         name: 'María Soto',
         passwordHash: await bcrypt.hash('demo1234', 10),
-        points: 80,
+        points: 0,
       } as any),
     )) as unknown as User;
     const lucas = (await this.usersRepo.save(
@@ -55,7 +55,7 @@ export class SeedService implements OnApplicationBootstrap {
         email: 'lucas@cinenova.dev',
         name: 'Lucas Ferreiro',
         passwordHash: await bcrypt.hash('demo1234', 10),
-        points: 20,
+        points: 0,
       } as any),
     )) as unknown as User;
 
@@ -182,21 +182,21 @@ export class SeedService implements OnApplicationBootstrap {
 
     const st1 = showtimes[0]; // Nébula Roja IMAX
     const imax = screens[3];
-    await this.saveBooking(demo, st1, [seatIdFor(imax, 5, 6), seatIdFor(imax, 5, 7)], 'confirmed', 10);
-    await this.saveBooking(demo, st1, [seatIdFor(imax, 4, 1)], 'used', 20);
-    await this.saveBooking(maria, st1, [seatIdFor(imax, 6, 4), seatIdFor(imax, 6, 5), seatIdFor(imax, 6, 6)], 'confirmed', 0);
+    await this.saveBooking(demo, st1, [seatIdFor(imax, 5, 6), seatIdFor(imax, 5, 7)], 'confirmed');
+    await this.saveBooking(demo, st1, [seatIdFor(imax, 4, 1)], 'used');
+    await this.saveBooking(maria, st1, [seatIdFor(imax, 6, 4), seatIdFor(imax, 6, 5), seatIdFor(imax, 6, 6)], 'confirmed');
 
     // Función 2 (Vector): demo confirmed
     if (showtimes.length > 1) {
       const st2 = showtimes[1];
       const screen2 = screens[st2.screenId - 1] ?? (await this.screensRepo.findOne({ where: { id: st2.screenId } }))!;
-      await this.saveBooking(demo, st2, [seatIdFor(screen2, 3, 5), seatIdFor(screen2, 3, 6)], 'confirmed', 0);
+      await this.saveBooking(demo, st2, [seatIdFor(screen2, 3, 5), seatIdFor(screen2, 3, 6)], 'confirmed');
     }
     // Una pendiente que expira en 9 minutos para que el demo pueda confirmarla o ver la expiración
     if (showtimes.length > 2) {
       const st3 = showtimes[2];
       const screen3 = screens[st3.screenId - 1] ?? (await this.screensRepo.findOne({ where: { id: st3.screenId } }))!;
-      const pending = await this.saveBooking(demo, st3, [seatIdFor(screen3, 2, 3), seatIdFor(screen3, 2, 4)], 'pending', 0);
+      const pending = await this.saveBooking(demo, st3, [seatIdFor(screen3, 2, 3), seatIdFor(screen3, 2, 4)], 'pending');
       this.logger.log(`Reserva pendiente demo #${pending.id} (expira en 9 min)`);
     }
 
@@ -222,7 +222,7 @@ export class SeedService implements OnApplicationBootstrap {
     this.logger.log(`Seed completo: ${movies.length} películas, ${screens.length} salas, ${showtimes.length} funciones, ${screenDefs.reduce((a, s) => a + s.rows * s.cols, 0)} butacas`);
   }
 
-  private async saveBooking(user: User, st: Showtime, seatIds: number[], status: 'confirmed' | 'used' | 'pending', points: number) {
+  private async saveBooking(user: User, st: Showtime, seatIds: number[], status: 'confirmed' | 'used' | 'pending') {
     const screen = (await this.screensRepo.findOne({ where: { id: st.screenId } }))!;
     const seats = await this.seatsRepo.findBy({ id: seatIds[0] as number });
     const seatRow = seats[0]?.row ?? 1;
@@ -240,8 +240,9 @@ export class SeedService implements OnApplicationBootstrap {
         code: status === 'confirmed' || status === 'used' ? this.codeFor(st.id, seatIds[0]) : null,
       } as any),
     )) as unknown as Booking;
-    if (points > 0) {
-      user.points += points;
+    // Puntos consistentes con la regla de negocio: 10 pts por butaca confirmada/usada
+    if (status !== 'pending') {
+      user.points += seatIds.length * 10;
       await this.usersRepo.save(user);
     }
     return booking;

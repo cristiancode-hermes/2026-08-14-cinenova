@@ -332,17 +332,18 @@ textarea.input { resize: vertical; min-height: 90px; }
 .seat.premium { border-color: rgba(245, 179, 1, 0.55); background: rgba(245, 179, 1, 0.12); }
 .seat.selected { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 700; font-size: 0.62rem; }
 .seat.held { background: repeating-linear-gradient(45deg, #4a3d12, #4a3d12 4px, #3a3010 4px, #3a3010 8px); border-color: rgba(245, 179, 1, 0.5); cursor: not-allowed; }
-.seat.taken { background: var(--surface-2); border-color: transparent; cursor: not-allowed; opacity: 0.55; }
+.seat.taken { background: var(--surface-2); border-color: #3a3e4d; cursor: not-allowed; }
 .seat.wa { border-color: var(--info); }
-.seat-num { font-size: 0.6rem; color: var(--ink-faint); }
+.seat-num { font-size: 0.6rem; color: #c9ccd8; }
+.seat.taken .seat-num { color: #a8acbc; }
 .seat.selected .seat-num { color: var(--accent-ink); }
-.seat-legend { display: flex; gap: 18px; flex-wrap: wrap; justify-content: center; margin-top: 22px; font-size: 0.78rem; color: var(--ink-muted); }
+.seat-legend { display: flex; gap: 18px; flex-wrap: wrap; justify-content: center; margin-top: 22px; font-size: 0.78rem; color: #c9ccd8; }
 .legend-item { display: flex; align-items: center; gap: 7px; }
 .legend-item .swatch { width: 18px; height: 15px; border-radius: 5px 5px 3px 3px; }
 .swatch-free { background: var(--surface-3); border: 1px solid var(--border); }
 .swatch-premium { background: rgba(245, 179, 1, 0.12); border: 1px solid rgba(245, 179, 1, 0.55); }
 .swatch-selected { background: var(--accent); }
-.swatch-occupied { background: var(--surface-2); border: 1px solid transparent; opacity: 0.55; }
+.swatch-occupied { background: var(--surface-2); border: 1px solid #3a3e4d; }
 .swatch-held { background: repeating-linear-gradient(45deg, #4a3d12, #4a3d12 3px, #3a3010 3px, #3a3010 6px); border: 1px solid rgba(245, 179, 1, 0.5); }
 
 /* Panel lateral de compra */

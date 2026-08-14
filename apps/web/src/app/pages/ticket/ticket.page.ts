@@ -35,7 +35,7 @@ import { apiError, eur, fmtDate, fmtDateTime, fmtTime } from '../../utils/errors
               <div class="ticket-row"><span class="k">Sala</span><span class="v">{{ t.screenName }}</span></div>
               <div class="ticket-row"><span class="k">Butacas</span><span class="v ticket-seats">@for (s of t.seatLabels; track $index) { <span class="chip chip-accent">{{ s }}</span> }</span></div>
               <div class="ticket-row"><span class="k">Importe</span><span class="v">{{ eur(t.totalAmount) }}</span></div>
-              <div class="ticket-row"><span class="k">Comprada</span><span class="v">{{ fmtDateTime(t.createdAt) }}</span></div>
+              <div class="ticket-row"><span class="k">{{ purchaseLabel(t.status) }}</span><span class="v">{{ fmtDateTime(t.createdAt) }}</span></div>
             </div>
             <div class="qr-box">
               <app-qr [code]="t.code ?? 'CNV-' + t.id" />
@@ -94,35 +94,85 @@ export class TicketPageComponent {
 
   constructor() {
     const id = Number(this.route.snapshot.paramMap.get('id'));
+    // Los navegadores congelan setInterval en pestañas inactivas: al volver,
+    // recalcula al instante desde el expiresAt del servidor y refresca el estado.
+    document.addEventListener('visibilitychange', this.onVisibility);
+    window.addEventListener('focus', this.onFocus);
     void this.load(id);
   }
+
+  ngOnDestroy() {
+    this.stopTimer();
+    document.removeEventListener('visibilitychange', this.onVisibility);
+    window.removeEventListener('focus', this.onFocus);
+  }
+
+  private readonly onVisibility = () => {
+    if (document.visibilityState === 'visible') this.onFocus();
+  };
+
+  private readonly onFocus = () => {
+    const t = this.ticket();
+    if (t?.status === 'pending' && t.expiresAt) {
+      this.tick(t.expiresAt);
+      // Refresca desde el servidor: si venció mientras estaba inactiva, la butaca ya se liberó sola
+      void this.load(t.id);
+    }
+  };
 
   async load(id: number) {
     try {
       const t = await firstValueFrom(this.http.get<Booking>(`/api/bookings/${id}`));
       this.ticket.set(t);
       if (t.status === 'pending') this.startCountdown(t.expiresAt);
+      else this.stopTimer();
       void this.auth.refreshProfile();
     } finally {
       this.loading.set(false);
     }
   }
 
+  private stopTimer() {
+    if (this.timer) {
+      clearInterval(this.timer);
+      this.timer = null;
+    }
+  }
+
   startCountdown(expiresAt: string | null) {
     if (!expiresAt) return;
-    const target = new Date(expiresAt).getTime();
-    const tick = () => {
-      const left = Math.max(0, target - Date.now());
-      const m = Math.floor(left / 60000);
-      const s = Math.floor((left % 60000) / 1000);
-      this.countdown.set(`${m}:${String(s).padStart(2, '0')}`);
-      if (left <= 0 && this.timer) {
-        clearInterval(this.timer);
-        void this.load(this.ticket()?.id ?? 0);
-      }
-    };
+    this.stopTimer();
+    const tick = () => this.tick(expiresAt);
     tick();
     this.timer = setInterval(tick, 1000);
+  }
+
+  /** Recálculo basado en el expiresAt del servidor (Date.now() real, no acumula ticks) */
+  private tick(expiresAt: string) {
+    const target = new Date(expiresAt).getTime();
+    const left = Math.max(0, target - Date.now());
+    const m = Math.floor(left / 60000);
+    const s = Math.floor((left % 60000) / 1000);
+    this.countdown.set(`${m}:${String(s).padStart(2, '0')}`);
+    if (left <= 0 && this.timer) {
+      this.stopTimer();
+      void this.load(this.ticket()?.id ?? 0);
+    }
+  }
+
+  purchaseLabel(status: Booking['status']): string {
+    switch (status) {
+      case 'pending':
+        return 'Reservada';
+      case 'confirmed':
+        return 'Comprada';
+      case 'used':
+        return 'Usada';
+      case 'cancelled':
+        return 'Cancelada';
+      default:
+        return 'Creada';
+    }
   }
 
   async act(action: 'confirm' | 'use' | 'cancel') {

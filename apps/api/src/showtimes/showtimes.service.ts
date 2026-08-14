@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { Booking, Seat, Showtime } from '../entities/entities';
@@ -6,14 +6,33 @@ import type { BookingStatus } from '../entities/entities';
 
 export const HOLD_MINUTES = 10;
 const ACTIVE_STATUSES: BookingStatus[] = ['pending', 'confirmed', 'used'];
+/** Cada cuánto se barren reservas pendientes vencidas (liberación automática de butacas) */
+const SWEEP_INTERVAL_MS = 30_000;
 
 @Injectable()
-export class ShowtimesService {
+export class ShowtimesService implements OnModuleInit, OnModuleDestroy {
+  private readonly logger = new Logger('SeatSweeper');
+  private sweeper: ReturnType<typeof setInterval> | null = null;
+
   constructor(
     @InjectRepository(Showtime) private readonly showtimesRepo: Repository<Showtime>,
     @InjectRepository(Seat) private readonly seatsRepo: Repository<Seat>,
     @InjectRepository(Booking) private readonly bookingsRepo: Repository<Booking>,
   ) {}
+
+  /** Barrido periódico: libera butacas de reservas pendientes vencidas sin esperar a un request */
+  onModuleInit() {
+    this.sweeper = setInterval(() => {
+      void this.expireStale().then((n) => {
+        if (n > 0) this.logger.log(`${n} reserva(s) vencida(s) liberadas automáticamente`);
+      });
+    }, SWEEP_INTERVAL_MS);
+    this.sweeper.unref?.();
+  }
+
+  onModuleDestroy() {
+    if (this.sweeper) clearInterval(this.sweeper);
+  }
 
   async findAll(opts: { movieId?: number; date?: string } = {}) {
     const where: Record<string, unknown> = { status: 'active' };

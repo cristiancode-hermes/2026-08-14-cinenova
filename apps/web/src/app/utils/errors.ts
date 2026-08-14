@@ -18,22 +18,26 @@ export function eur(v: number): string {
   return `${v.toFixed(2).replace('.', ',')} €`;
 }
 
+/** Zona horaria del cine (España) — las horas se muestran siempre en hora local del cine,
+ *  no en la del navegador, para que la hora sea estable y correcta para todos. */
+const TZ = 'Europe/Madrid';
+
 export function fmtTime(iso: string): string {
   const d = new Date(iso);
-  return d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+  return d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', timeZone: TZ });
 }
 
 export function fmtDate(iso: string): string {
   const d = new Date(iso);
-  return d.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+  return d.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', timeZone: TZ });
 }
 
 export function fmtDateShort(iso: string): string {
   const d = new Date(iso);
-  return d.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' });
+  return d.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', timeZone: TZ });
 }
 
 export function fmtDateTime(iso: string): string {
   const d = new Date(iso);
-  return `${d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })} · ${d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`;
+  return `${d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', timeZone: TZ })} · ${d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', timeZone: TZ })}`;
 }
