@@ -1,0 +1,7 @@
+QA testing complete for 2026-08-14
+Project: cinenova
+Build: ✅ API tsc + Web ng build (Tailwind v4) — exit 0
+Tests: 47/47 passing (5 suites jest) + 46/46 endpoint checks
+New tests: 47 added (auth 8, bookings 17, showtimes 8, movies 8, reviews 6)
+Issues: 1 critica (NG02100 locale es → tooltip/fechas) CORREGIDA y verificada; 1 menor (carpetas vacías); 1 desviación de alcance (admin/combos no construidos)
+Published: ✅ Caddy (cinenova.proyectos.cristiancode.dev:3063), ✅ Landing, ✅ Excel row 79, ✅ Portfolio (es.ts+en.ts+pt.ts), ✅ GitHub 2026-08-14-cinenova, ✅ Capturas logueadas
