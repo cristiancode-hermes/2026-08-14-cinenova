@@ -106,6 +106,36 @@ button { font-family: inherit; }
 .btn-ghost { background: transparent; color: var(--ink-muted); border: 1px solid var(--border); padding: 9px 16px; border-radius: 8px; font-weight: 600; font-size: 0.92rem; cursor: pointer; transition: all 0.15s; }
 .btn-ghost:hover { color: var(--ink); border-color: var(--ink-faint); background: var(--surface-2); }
 
+/* ============ NAV RESPONSIVE ============ */
+@media (max-width: 860px) {
+  .nav-inner { gap: 14px; }
+  .brand { font-size: 1.1rem; }
+  .brand-mark { width: 30px; height: 30px; font-size: 0.95rem; }
+  .nav-links { margin-left: 0; gap: 2px; }
+  .nav-links a { padding: 7px 10px; font-size: 0.88rem; }
+  .nav-user { gap: 8px; }
+  .nav-pts { padding: 3px 8px; font-size: 0.75rem; }
+  .btn-ghost.btn-sm { padding: 7px 12px; font-size: 0.85rem; }
+}
+@media (max-width: 640px) {
+  .nav { height: auto; min-height: var(--nav-h); }
+  .nav-inner { flex-wrap: wrap; gap: 6px 12px; padding: 8px 0; }
+  .brand { order: 1; font-size: 1.05rem; }
+  .brand-mark { width: 28px; height: 28px; font-size: 0.9rem; }
+  .nav-spacer { order: 2; flex: 1; }
+  .nav-user { order: 2; gap: 8px; }
+  .nav-links { order: 3; width: 100%; justify-content: center; gap: 2px; margin-top: 2px; }
+  .nav-links a { padding: 6px 10px; font-size: 0.85rem; }
+  .nav-pts { font-size: 0.72rem; padding: 3px 7px; }
+  .btn-ghost.btn-sm, .btn-login { padding: 6px 11px; font-size: 0.83rem; min-height: 32px; }
+}
+@media (max-width: 400px) {
+  .nav-inner { padding: 6px 0; }
+  .brand { gap: 7px; }
+  .nav-links a { padding: 6px 7px; font-size: 0.8rem; }
+  .nav-pts { display: none; }
+}
+
 /* ============ BOTONES ============ */
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
@@ -367,6 +397,7 @@ textarea.input { resize: vertical; min-height: 90px; }
 .ticket-top h2 { font-size: 1.15rem; font-weight: 800; flex: 1; }
 .ticket-top .t-code { font-family: var(--font-mono); font-weight: 700; letter-spacing: 0.06em; }
 .ticket-body { display: grid; grid-template-columns: 1fr 150px; gap: 22px; padding: 24px 22px; }
+@media (max-width: 560px) { .ticket-body { grid-template-columns: 1fr; } .qr-box { order: -1; } .qr-box svg { width: 160px; height: 160px; } }
 .ticket-title { font-family: var(--font-display); font-size: 1.45rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 4px; }
 .ticket-movie-sub { color: var(--ink-muted); font-size: 0.9rem; margin-bottom: 16px; }
 .ticket-row { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px dashed var(--border); font-size: 0.9rem; }
@@ -400,6 +431,7 @@ textarea.input { resize: vertical; min-height: 90px; }
 
 /* ============ PERFIL / FIDELIDAD ============ */
 .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 640px) { .profile-grid { grid-template-columns: 1fr; } }
 .loyalty-card {
   background: linear-gradient(140deg, rgba(245,179,1,0.16), rgba(245,179,1,0.04)), var(--surface);
   border: 1px solid rgba(245, 179, 1, 0.35); border-radius: var(--radius-lg); padding: 26px;
