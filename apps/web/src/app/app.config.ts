@@ -1,8 +1,13 @@
 import { ApplicationConfig, provideZonelessChangeDetection } from '@angular/core';
+import { registerLocaleData } from '@angular/common';
+import localeEs from '@angular/common/locales/es';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { routes } from './app.routes';
 import { authInterceptor } from './interceptors/auth.interceptor';
+
+// Fecha en español para DatePipe (| date : '...' : '' : 'es') — sin esto, NG02100
+registerLocaleData(localeEs);
 
 export const appConfig: ApplicationConfig = {
   providers: [
